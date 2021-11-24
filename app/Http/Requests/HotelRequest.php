@@ -25,7 +25,8 @@ class HotelRequest extends FormRequest
     public function rules()
     {
         return [
-             'nit' => 'required'
+             'nit' => 'required',
+             'nombre' => 'required'
         ];
     }
 

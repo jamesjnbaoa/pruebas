@@ -33,91 +33,85 @@ Route::post('AddSucursal', function (HotelRequest $request) {
 
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
-        $validar = Hoteles::where('suc_nit',$request->nit)->get()->count();
-        if($validar == 0) {
+        $validar = Hoteles::where('suc_nit', $request->nit)->get()->count();
+        if ($validar == 0) {
             $suc = new Hoteles();
             $suc->suc_nit = $request->nit;
             $suc->suc_name = $request->nombre;
             $suc->suc_dir = $request->direccion;
             $suc->suc_hab = $request->numero;
             $suc->created_at = Carbon::now();
-            $suc->save();
-            if ($suc) {
-                return array('Radicado' => $suc->sucursal_id, 'Msj'=> 'Se registro el hotel con exito');
+
+            if ($suc->save()) {
+                return array('Radicado' => $suc->sucursal_id, 'Msj' => 'Se registro el hotel con exito');
             } else {
                 return array('Msj' => '¡Error al registrar el hotel!');
             }
-        }else{
+        } else {
             return array('Msj' => '¡El nit ya se encuentra registrado!');
         }
-    }else{
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
 Route::post('UpSucursal', function (HotelRequest $request) {
 
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
-            $suc =  Hoteles::find($request->id);
-            $suc->suc_nit = $request->nit;
-            $suc->suc_name = $request->nombre;
-            $suc->suc_dir = $request->direccion;
-            $suc->suc_hab = $request->numero;
-            $suc->created_at = Carbon::now();
-            $suc->save();
-            if ($suc) {
-                return array('Radicado' => $suc->sucursal_id, 'Msj'=> 'Se edito el hotel con exito');
-            } else {
-                return array('Msj' => '¡Error al registrar el hotel!');
-            }
-        
-    }else{
+        $suc =  Hoteles::find($request->id);
+        //$suc->suc_nit = $request->nit;
+        $suc->suc_name = $request->nombre;
+        $suc->suc_dir = $request->direccion;
+        $suc->suc_hab = $request->numero;
+        $suc->created_at = Carbon::now();
+        $suc->save();
+        if ($suc) {
+            return array('Radicado' => $suc->sucursal_id, 'Msj' => 'Se edito el hotel con exito');
+        } else {
+            return array('Msj' => '¡Error al registrar el hotel!');
+        }
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
 Route::get('Sucursales', function (Request $request) {
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
         $suc = Hoteles::all();
         return $suc;
-    }else{
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
 Route::get('Sucursales/{id}', function (Request $request, $id) {
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
         $suc = Hoteles::find($id);
         return $suc;
-    }else{
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
 
 Route::delete('Sucursales/{id}', function (Request $request, $id) {
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
         $suc = Hoteles::find($id);
         $suc->delete();
-        return array('Radicado' => $id, 'Msj'=> 'Se elimino el hotel con exito');
-    }else{
+        return array('Radicado' => $id, 'Msj' => 'Se elimino el hotel con exito');
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
 //  modulo de creacion de habitaciones
 
@@ -125,130 +119,126 @@ Route::post('AddHabitacion', function (HabRequest $request) {
 
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
-        $validar = Habitaciones::where('hab_tipo',$request->tipo)->where('hab_acomodacion',$request->aco)->where('sucursal_id',$request->sucursal)->get()->count();
-        if($validar == 0) {
-            $hab = new Habitaciones();
-            $hab->sucursal_id = $request->sucursal;
-            $hab->hab_tipo = $request->tipo;
-            $hab->hab_acomodacion = $request->aco;
-            $hab->hab_numero = $request->numero;
-            $hab->created_at = Carbon::now();
-            
-            if ($hab->save()) {
-                return array('Radicado' => $hab->hab_id, 'Msj'=> 'Se registro la habitacion con exito');
+        $validar = Habitaciones::where('hab_tipo', $request->tipo)->where('hab_acomodacion', $request->aco)->where('sucursal_id', $request->sucursal)->get()->count();
+        if ($validar == 0) {
+            $validar2 = Hoteles::where('sucursal_id', $request->sucursal)->get()->first();
+            $max = $validar2->suc_hab;
+
+            $habitacion = Habitaciones::where('sucursal_id', $request->sucursal)->get()->count();
+          
+
+            if (  $max > $habitacion) {
+
+
+
+                $hab = new Habitaciones();
+                $hab->sucursal_id = $request->sucursal;
+                $hab->hab_tipo = $request->tipo;
+                $hab->hab_acomodacion = $request->aco;
+                $hab->hab_numero = $request->numero;
+                $hab->created_at = Carbon::now();
+
+                if ($hab->save()) {
+                    return array('Radicado' => $hab->hab_id, 'Msj' => 'Se registro la habitacion con exito');
+                } else {
+                    return array('Msj' => '¡Error al registrar la habitacion!');
+                }
             } else {
-                return array('Msj' => '¡Error al registrar la habitacion!');
+                return array('Msj' => '¡Superaste el maximo de habitaciones configurada!');
             }
-        }else{
+        } else {
             return array('Msj' => '¡Ya hay una habitacion con estas caracteristicas!');
         }
-    }else{
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
 Route::post('UpHabitacion', function (HabRequest $request, $id) {
 
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
-        $validar = Habitaciones::where('hab_tipo',$request->tipo)->where('hab_acomodacion',$request->aco)->where('sucursal_id',$request->sucursal)->get()->count();
-        if($validar == 0) {
+        $validar = Habitaciones::where('hab_tipo', $request->tipo)->where('hab_acomodacion', $request->aco)->where('sucursal_id', $request->sucursal)->get()->count();
+        if ($validar == 0) {
             $hab = Habitaciones::find($id);
             $hab->sucursal_id = $request->sucursal;
             $hab->hab_tipo = $request->tipo;
             $hab->hab_acomodacion = $request->aco;
             $hab->hab_numero = $request->numero;
             $hab->created_at = Carbon::now();
-            
+
             if ($hab->save()) {
-                return array('Radicado' => $hab->hab_id, 'Msj'=> 'Se registro la habitacion con exito');
+                return array('Radicado' => $hab->hab_id, 'Msj' => 'Se registro la habitacion con exito');
             } else {
                 return array('Msj' => '¡Error al registrar la habitacion!');
             }
-        }else{
+        } else {
             return array('Msj' => '¡Ya hay una habitacion con estas caracteristicas!');
         }
-    }else{
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
-Route::get('Habitaciones/{id}', function (Request $request, $id) {
-    $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
-
-        $suc = Habitaciones::find($id);
-        return $suc;
-    }else{
-        return array('Msj' => '¡Error en la comunicacion');
-    }
-    
-});
 
 Route::delete('Habitaciones/{id}', function (Request $request, $id) {
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
         $suc = Habitaciones::find($id);
         $suc->delete();
-        return array('Radicado' => $id, 'Msj'=> 'Se elimino la habitacion con exito');
-    }else{
+        return array('Radicado' => $id, 'Msj' => 'Se elimino la habitacion con exito');
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
-Route::get('Acomodaciones', function (Request $request, $id) {
+Route::get('Acomodaciones', function (Request $request) {
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
         $suc = Acomodaciones::all();
         return $suc;
-    }else{
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
-Route::get('Habitaciones', function (Request $request) {
+
+Route::get('VerHabitaciones/{id}', function (Request $request, $id) {
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
-        $suc = Hoteles::all();
-        return $suc;
-    }else{
+        $tipo = DB::select('select * from sucursal a, habitaciones b, tipos c, acomodaciones d where a.sucursal_id=b.sucursal_id and b.hab_tipo=c.tipo_id and b.hab_acomodacion=d.aco_id and b.sucursal_id='.$id.' ');
+        return $tipo;
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
 Route::get('Tipos', function (Request $request) {
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
         $tipo = Tipos::all();
         return $tipo;
-    }else{
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
 
 Route::get('ConsultaHabitaciones', function (Request $request) {
     $header = $request->header('Authorization');
 
-    if($header=='testhotel'){
+    if ($header == 'testhotel') {
 
         $tipo = DB::select('select * from sucursal a, habitaciones b, tipos c, acomodaciones d where a.sucursal_id=b.sucursal_id and b.hab_tipo=c.tipo_id and b.hab_acomodacion=d.aco_id;');
         return $tipo;
-    }else{
+    } else {
         return array('Msj' => '¡Error en la comunicacion');
     }
-    
 });
